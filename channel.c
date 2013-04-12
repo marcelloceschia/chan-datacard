@@ -1141,17 +1141,7 @@ EXPORT_DEF struct ast_channel* new_channel (struct pvt* pvt, int ast_state, cons
 			0, 
 			"%s/%s-%02u%08lx", channel_tech.type, PVT_ID(pvt), call_idx, pvt->channel_instanse++
 		);
-// 		ast_channel_alloc(
-// 			0, 
-// 			AST_STATE_DOWN, 
-// 			channel->line->cid_num, 
-// 			channel->line->cid_name, 
-// 			channel->line->accountcode, 
-// 			channel->dialedNumber, 
-// 			channel->line->context, 
-// 			linkedId, 
-// 			channel->line->amaflags, 
-// 			"SCCP/%s-%08X", channel->line->name, channel->callid);
+
 
 		if (channel)
 		{
