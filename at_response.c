@@ -34,6 +34,11 @@
 #define CLCC_CALL_TYPE_DATA	1
 #define CLCC_CALL_TYPE_FAX	2
 
+
+#define get_tech_pvt(x)  ast_channel_tech_pvt((x))
+
+
+
 /* magic!!! must be in same order as elements of enums in at_res_t */
 static const at_response_t at_responses_list[] = {
 	{ RES_PARSE_ERROR,"PARSE ERROR", 0, 0 },
@@ -851,14 +856,15 @@ static int start_pbx(struct pvt* pvt, const char * number, int call_idx, call_st
 
 		return -1;
 	}
-	cpvt = channel->tech_pvt;
+	cpvt = get_tech_pvt(channel);
 // FIXME: not execute if channel_new() failed
 	CPVT_SET_FLAGS(cpvt, CALL_FLAG_NEED_HANGUP);
 
 	// ast_pbx_start() usually failed if asterisk.conf minmemfree set too low, try drop buffer cache sync && echo 3 > /proc/sys/vm/drop_caches
 	if (ast_pbx_start (channel))
 	{
-		channel->tech_pvt = NULL;
+// 		channel->tech_pvt = NULL;
+		ast_channel_tech_pvt_set(channel, NULL);
 		cpvt_free(cpvt);
 
 		ast_hangup (channel);
@@ -920,7 +926,7 @@ static int at_response_clcc (struct pvt* pvt, char* str)
 								if(cpvt->channel)
 								{
 									/* FIXME: unprotected channel access */
-									cpvt->channel->rings += pvt->rings;
+// 									cpvt->channel->rings += pvt->rings;
 									pvt->rings = 0;
 								}
 							}

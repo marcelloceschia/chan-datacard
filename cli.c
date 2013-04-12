@@ -15,7 +15,7 @@
 #include <asterisk.h>
 #include <asterisk/cli.h>			/* struct ast_cli_entry; struct ast_cli_args */
 #include <asterisk/callerid.h>			/* ast_describe_caller_presentation() */
-#include <asterisk/version.h>			/* ASTERISK_VERSION_NUM */
+
 
 #include "cli.h"
 #include "chan_dongle.h"			/* devices */
@@ -552,11 +552,8 @@ static char * cli_pdu(struct ast_cli_entry * e, int cmd, struct ast_cli_args * a
 	return CLI_SUCCESS;
 }
 
-#if ASTERISK_VERSION_NUM >= 10800
 typedef const char * const * ast_cli_complete2_t;
-#else
-typedef char * const * ast_cli_complete2_t;
-#endif
+
 
 static char* cli_ccwa_set (struct ast_cli_entry* e, int cmd, struct ast_cli_args* a)
 {

@@ -1609,6 +1609,11 @@ static int load_module()
 	int rv;
 
 	gpublic = ast_calloc(1, sizeof(*gpublic));
+	if (!(channel_tech.capabilities = ast_format_cap_alloc())) {
+		return AST_MODULE_LOAD_FAILURE;
+	}
+	
+	
 	if(gpublic)
 	{
 		pdiscovery_init();
@@ -1628,6 +1633,8 @@ static int load_module()
 static int public_state_init(struct public_state * state)
 {
 	int rv = AST_MODULE_LOAD_DECLINE;
+	
+	ast_format_cap_add_all_by_type(channel_tech.capabilities, AST_FORMAT_TYPE_AUDIO);
 	
 	AST_RWLIST_HEAD_INIT(&state->devices);
 	ast_mutex_init(&state->discovery_lock);

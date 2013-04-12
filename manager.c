@@ -733,7 +733,7 @@ EXPORT_DEF void manager_register()
 	unsigned i;
 	for(i = 0; i < ITEMS_OF(dcm); i++)
 	{
-		ast_manager_register2 (dcm[i].name, dcm[i].authority, dcm[i].func, dcm[i].brief, dcm[i].desc);
+		ast_manager_register2 (dcm[i].name, dcm[i].authority, dcm[i].func, NULL, dcm[i].brief, dcm[i].desc);
 	}
 }
 
