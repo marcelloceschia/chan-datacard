@@ -15,6 +15,7 @@
 #include <asterisk.h>
 #include <asterisk/logger.h>			/* ast_debug() */
 #include <asterisk/pbx.h>			/* ast_pbx_start() */
+#include "asterisk/message.h"
 
 #include "at_response.h"
 #include "mutils.h"				/* STRLEN() */
@@ -1249,6 +1250,7 @@ static int at_response_cmgr (struct pvt* pvt, const char * str, size_t len)
 
 		manager_event_new_sms(PVT_ID(pvt), number, msg);
 		manager_event_new_sms_base64(PVT_ID(pvt), number, text_base64);
+#if 0
 		{
 			channel_var_t vars[] = 
 			{
@@ -1259,6 +1261,22 @@ static int at_response_cmgr (struct pvt* pvt, const char * str, size_t len)
 			};
 			start_local_channel (pvt, "sms", number, vars);
 		}
+#else
+		{
+			struct ast_msg *ast_msg;
+			if (!(ast_msg = ast_msg_alloc())) {
+				ast_log (LOG_WARNING, "[%s] unable to allocate message structure\n", PVT_ID(pvt));
+				return 0;
+			}
+			
+			ast_msg_set_to(ast_msg, "%s", CONF_SHARED(pvt, exten));
+			ast_msg_set_from(ast_msg, "\"%s\" <dongle:%s>", number, number);
+			ast_msg_set_body(ast_msg, "%s", msg);
+			ast_msg_set_context(ast_msg, "%s", CONF_SHARED(pvt, context));
+			ast_msg_set_exten(ast_msg, "%s", CONF_SHARED(pvt, exten));
+			ast_msg_queue(ast_msg); 
+		}
+#endif
 	    }
 	    else
 	    {

@@ -49,6 +49,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Rev: " PACKAGE_REVISION " $")
 #include <asterisk/callerid.h>
 #include <asterisk/module.h>		/* AST_MODULE_LOAD_DECLINE ... */
 #include <asterisk/timing.h>		/* ast_timer_open() ast_timer_fd() */
+#include "asterisk/message.h"
 
 #include <sys/stat.h>			/* S_IRUSR | S_IRGRP | S_IROTH */
 #include <termios.h>			/* struct termios tcgetattr() tcsetattr()  */
@@ -1604,6 +1605,20 @@ static void devices_destroy(public_state_t * state)
 }
 
 
+static int asterisk_message_send(const struct ast_msg *msg, const char *to, const char *from)
+{
+	int res = -1;
+
+	return res;
+}
+
+static const struct ast_msg_tech sms_msg_tech = {
+	/* *INDENT-OFF* */
+	.name = "dongle",
+	.msg_send = asterisk_message_send,
+	/* *INDENT-ON* */
+};
+
 static int load_module()
 {
 	int rv;
@@ -1613,6 +1628,9 @@ static int load_module()
 		return AST_MODULE_LOAD_FAILURE;
 	}
 	
+	if (ast_msg_tech_register(&sms_msg_tech)) {
+		ast_log (LOG_WARNING, "Unable to register message handler\n");
+	}
 	
 	if(gpublic)
 	{
@@ -1705,7 +1723,8 @@ static void public_state_fini(struct public_state * state)
 
 static int unload_module()
 {
-
+	ast_msg_tech_unregister(&sms_msg_tech);
+  
 	public_state_fini(gpublic);
 	pdiscovery_fini();
 	
