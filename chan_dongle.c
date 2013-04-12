@@ -51,6 +51,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Rev: " PACKAGE_REVISION " $")
 #include <asterisk/timing.h>		/* ast_timer_open() ast_timer_fd() */
 #include "asterisk/message.h"
 
+
 #include <sys/stat.h>			/* S_IRUSR | S_IRGRP | S_IROTH */
 #include <termios.h>			/* struct termios tcgetattr() tcsetattr()  */
 #include <pthread.h>			/* pthread_t pthread_kill() pthread_join() */
@@ -69,6 +70,7 @@ ASTERISK_FILE_VERSION(__FILE__, "$Rev: " PACKAGE_REVISION " $")
 #include "channel.h"			/* channel_queue_hangup() */
 #include "dc_config.h"			/* dc_uconfig_fill() dc_gconfig_fill() dc_sconfig_fill()  */
 #include "pdiscovery.h"			/* pdiscovery_lookup() pdiscovery_init() pdiscovery_fini() */
+#include "helpers.h"			/* send_sms */
 
 EXPORT_DEF const char * const dev_state_strs[4] = { "stop", "restart", "remove", "start" };
 EXPORT_DEF public_state_t * gpublic;
@@ -1608,6 +1610,35 @@ static void devices_destroy(public_state_t * state)
 static int asterisk_message_send(const struct ast_msg *msg, const char *to, const char *from)
 {
 	int res = -1;
+	
+	char *dest;
+	char *deviceName;
+	const char* msgStr;
+	int status;
+	void * msgid;
+
+
+	dest = (char *) strdupa(to);
+
+
+	/* parse format dongle:+4112345678@dongle0 or dongle:+49987654321@dongle0 */
+	while ((deviceName = strsep(&dest, ","))) {
+		
+		if (!strncmp(deviceName, "dongle:", 7)) {
+			strsep(&deviceName, ":");
+			
+			if (ast_strlen_zero(deviceName)) {
+				ast_log(LOG_WARNING, "MESSAGE(to) is invalid - '%s'\n", to);
+				return -1;
+			}
+			
+			to = strsep(&deviceName, "@");
+
+			msgStr = send_sms(deviceName, to, ast_msg_get_body(msg), "1440", 0, &status, &msgid);
+			if(!status)
+				ast_log (LOG_ERROR, "[%s] %s with id %p\n", deviceName, msgStr, msgid);
+		}
+	}
 
 	return res;
 }
